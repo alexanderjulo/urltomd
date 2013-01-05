@@ -17,13 +17,13 @@ mapper = urltomd.Mapper('.')
 blogpost = mapper.create('urltomd')
 blogpost.meta['title'] = 'Today I discoved urltomd'
 blogpost.meta['author'] = 'Me'
-blogpost.type['type'] = 'post'
+blogpost.meta['type'] = 'post'
 blogpost.body = 'It is a really cool tool to manage content in a human readable way.'
 blogpost.save()
 
 # mapper.contents will show you all the contents
 # in your directory
-mapper.contents()
+mapper.contents
 ```
 
 ## How can I get it?
