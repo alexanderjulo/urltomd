@@ -44,12 +44,7 @@ class Mapper(object):
 		os.remove(url)
 		return True
 
-	@property
-	def contents(self):
-		"""This property will return a full list of all contents
-		with their url paths. As this has to index the whole
-		directory every time it is run, it can be very slow on
-		bigger collections and should be used carefully."""
+	def _list(self, subdirectory=None):
 		def _walk(directory, path_prefix=()):
 			for name in os.listdir(directory):
 				fullname = os.path.join(directory, name)
@@ -57,10 +52,33 @@ class Mapper(object):
 					_walk(fullname, path_prefix + (name,))
 				elif name.endswith('.md'):
 					url = u'/'.join(path_prefix + (name[:-3],))
-					_contents[url] = Content(self, url)
-		_contents = {}
-		_walk(self.path)
-		return _contents
+					if subdirectory:
+						url = u'/'.join([subdirectory, url])
+					elements[url] = Content(self, url)
+		elements = {}
+		if subdirectory:
+			_walk(self.path + subdirectory)
+		else:
+			_walk(self.path)
+		return elements
+
+	@property
+	def contents(self):
+		"""This property will return a full list of all contents
+		with their url paths. As this has to index the whole
+		directory every time it is run, it can be very slow on
+		bigger collections and should be used carefully."""
+		return self._list()
+
+	def subcontents(self, url):
+		url = trim_url(url)
+		"""Get all contents that start with the given url. This
+		will only work is the url is the full part before a
+		slash, which means all contents will be stored in one
+		directory and its subdirectories."""
+		if not os.path.isdir(self.path + url):
+			return None
+		return self._list(url)
 
 class Content(object):
 
