@@ -107,7 +107,8 @@ class Mapper(object):
 					url = u'/'.join(path_prefix + (name[:-3],))
 					if subdirectory:
 						url = u'/'.join([subdirectory, url])
-					elements[url] = self.contentclass(self, url)
+					element = self.contentclass(self, url)
+					elements[element.url] = element
 		elements = {}
 		if subdirectory:
 			_walk(self.path + subdirectory)
