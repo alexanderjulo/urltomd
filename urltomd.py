@@ -44,6 +44,24 @@ class Mapper(object):
 		os.remove(url)
 		return True
 
+	@property
+	def contents(self):
+		"""This property will return a full list of all contents
+		with their url paths. As this has to index the whole
+		directory every time it is run, it can be very slow on
+		bigger collections and should be used carefully."""
+		def _walk(directory, path_prefix=()):
+			for name in os.listdir(directory):
+				fullname = os.path.join(directory, name)
+				if os.path.isdir(fullname):
+					_walk(fullname, path_prefix + (name,))
+				elif name.endswith('.md'):
+					url = u'/'.join(path_prefix + (name[:-3],))
+					_contents[url] = Content(self, url)
+		_contents = {}
+		_walk(self.path)
+		return _contents
+
 class Content(object):
 
 	def __init__(self, mapper, url):

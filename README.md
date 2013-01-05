@@ -6,18 +6,25 @@ They body will be handled as markdown and metadata will be saved as yaml. Metada
 
 ## How it works
 
-    ```python
-    import urltomd
-    # create an instance of the mapper that manages a directory of your choice
-    mapper = urltomd.Mapper('your directory') 
+```python
+import urltomd
+# create an instance of the mapper that manages
+# a directory of your choice
+mapper = urltomd.Mapper('.')
+# yes, relative directories will work! 
 
-    # create new content in the directory
-    blogpost = mapper.create('urltomd')
-    blogpost.meta['title'] = 'Today I discoved urltomd'
-    blogpost.meta['author'] = 'Me'
-    blogpost.type['type'] = 'post'
-    blogpost.body = 'It is a really cool tool to manage content in a human readable way.'
-    blogpost.save()
+# create new content in the directory
+blogpost = mapper.create('urltomd')
+blogpost.meta['title'] = 'Today I discoved urltomd'
+blogpost.meta['author'] = 'Me'
+blogpost.type['type'] = 'post'
+blogpost.body = 'It is a really cool tool to manage content in a human readable way.'
+blogpost.save()
+
+# mapper.contents will show you all the contents
+# in your directory
+mapper.contents()
+
 
 # How can I get it?
 Just download the `urltomd.py` file and import it to your project.
