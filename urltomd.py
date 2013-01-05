@@ -1,6 +1,7 @@
 import os
 import yaml
 import markdown
+from exceptions import IOError
 
 def trim_url(url):
 	if url.startswith('/'):
@@ -8,77 +9,6 @@ def trim_url(url):
 	if url.endswith('/'):
 		url = url[:-1]
 	return url
-
-class Mapper(object):
-
-	def __init__(self, path):
-		if not os.path.isdir(path):
-			return None
-		if not path.endswith('/'):
-			path += '/'
-		self.path = path
-
-	def exists(self, url):
-		url = trim_url(url)
-		return os.path.exists(self.path + url + '.md')
-
-	def get(self, url):
-		url = trim_url(url)
-		if not self.exists(url):
-			return None
-		return Content(self, url)
-
-	def create(self, url):
-		url = trim_url(url)
-		if self.exists(url):
-			return False
-		path = '/'.join(url.split('/')[:-1])
-		if len(path) > 0 and not os.path.exists(self.path + path):
-			os.makedirs(self.path + path)
-		return Content(self, url)
-
-	def delete(self, url):
-		url = trim_url(url)
-		if not os.path.exists(self.path + url):
-			return None
-		os.remove(url)
-		return True
-
-	def _list(self, subdirectory=None):
-		def _walk(directory, path_prefix=()):
-			for name in os.listdir(directory):
-				fullname = os.path.join(directory, name)
-				if os.path.isdir(fullname):
-					_walk(fullname, path_prefix + (name,))
-				elif name.endswith('.md'):
-					url = u'/'.join(path_prefix + (name[:-3],))
-					if subdirectory:
-						url = u'/'.join([subdirectory, url])
-					elements[url] = Content(self, url)
-		elements = {}
-		if subdirectory:
-			_walk(self.path + subdirectory)
-		else:
-			_walk(self.path)
-		return elements
-
-	@property
-	def contents(self):
-		"""This property will return a full list of all contents
-		with their url paths. As this has to index the whole
-		directory every time it is run, it can be very slow on
-		bigger collections and should be used carefully."""
-		return self._list()
-
-	def subcontents(self, url):
-		url = trim_url(url)
-		"""Get all contents that start with the given url. This
-		will only work is the url is the full part before a
-		slash, which means all contents will be stored in one
-		directory and its subdirectories."""
-		if not os.path.isdir(self.path + url):
-			return None
-		return self._list(url)
 
 class Content(object):
 
@@ -97,7 +27,7 @@ class Content(object):
 		with open(self._path()) as f:
 			content = f.read().decode('utf8')
 		content = content.split(u'\n\n')
-		self._meta = yaml.load(content[0])
+		self._meta = yaml.safe_load(content[0])
 		self.body = '\n\n'.join(content[1:])
 
 	def _write(self):
@@ -129,3 +59,76 @@ class Content(object):
 
 	def reload(self):
 		self._read()
+
+class Mapper(object):
+
+	def __init__(self, path, contentclass=Content):
+		if not os.path.isdir(path):
+			raise IOError('%s does not exist or is not a directory.'
+				% path)
+		if not path.endswith('/'):
+			path += '/'
+		self.path = path
+		self.contentclass = contentclass
+
+	def exists(self, url):
+		url = trim_url(url)
+		return os.path.exists(self.path + url + '.md')
+
+	def get(self, url):
+		url = trim_url(url)
+		if not self.exists(url):
+			return None
+		return self.contentclass(self, url)
+
+	def create(self, url):
+		url = trim_url(url)
+		if self.exists(url):
+			return False
+		path = '/'.join(url.split('/')[:-1])
+		if len(path) > 0 and not os.path.exists(self.path + path):
+			os.makedirs(self.path + path)
+		return self.contentclass(self, url)
+
+	def delete(self, url):
+		url = trim_url(url)
+		if not os.path.exists(self.path + url):
+			return None
+		os.remove(url)
+		return True
+
+	def _list(self, subdirectory=None):
+		def _walk(directory, path_prefix=()):
+			for name in os.listdir(directory):
+				fullname = os.path.join(directory, name)
+				if os.path.isdir(fullname):
+					_walk(fullname, path_prefix + (name,))
+				elif name.endswith('.md'):
+					url = u'/'.join(path_prefix + (name[:-3],))
+					if subdirectory:
+						url = u'/'.join([subdirectory, url])
+					elements[url] = self.contentclass(self, url)
+		elements = {}
+		if subdirectory:
+			_walk(self.path + subdirectory)
+		else:
+			_walk(self.path)
+		return elements
+
+	@property
+	def contents(self):
+		"""This property will return a full list of all contents
+		with their url paths. As this has to index the whole
+		directory every time it is run, it can be very slow on
+		bigger collections and should be used carefully."""
+		return self._list()
+
+	def subcontents(self, url):
+		url = trim_url(url)
+		"""Get all contents that start with the given url. This
+		will only work is the url is the full part before a
+		slash, which means all contents will be stored in one
+		directory and its subdirectories."""
+		if not os.path.isdir(self.path + url):
+			return None
+		return self._list(url)
