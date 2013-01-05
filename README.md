@@ -4,7 +4,7 @@ URLtoMD is a simple tool to map url like structured content onto your filesystem
 
 They body will be handled as markdown and metadata will be saved as yaml. Metadata will always come first separated from the markdown body by an empty line.
 
-## How it works
+## How does it work?
 
 ```python
 import urltomd
@@ -26,7 +26,7 @@ blogpost.save()
 mapper.contents()
 ```
 
-# How can I get it?
+## How can I get it?
 Just download the `urltomd.py` file and import it to your project.
 
 The requirements can be checked in the `requirements.txt` file, which are basically yaml and markdown.
