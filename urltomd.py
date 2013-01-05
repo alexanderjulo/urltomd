@@ -3,28 +3,28 @@ import yaml
 import markdown
 from exceptions import IOError
 
-def trim_url(url):
-	if url.startswith('/'):
-		url = url[1:]
-	if url.endswith('/'):
-		url = url[:-1]
-	return url
+def trim_path(path):
+	if path.startswith('/'):
+		path = path[1:]
+	if path.endswith('/'):
+		path = path[:-1]
+	return path
 
 class Content(object):
 
-	def __init__(self, mapper, url):
-		self.mapper = mapper
-		self.url = url
+	def __init__(self, root, path):
+		self.root = root
+		self.path = path
 		self.body = None
 		self._meta = {}
-		if os.path.exists(self._path()):
+		if os.path.exists(self._full_path()):
 			self._read()
 
 	def _read(self):
 		"""Load the current state on the disk. If you use `_read`
 		before you saved eventual changes with `_write` they will
 		be lost."""
-		with open(self._path()) as f:
+		with open(self._full_path()) as f:
 			content = f.read().decode('utf8')
 		content = content.split(u'\n\n')
 		self._meta = yaml.safe_load(content[0])
@@ -32,13 +32,13 @@ class Content(object):
 
 	def _write(self):
 		"""Write the current state to the file."""
-		with open(self._path(), 'w') as f:
+		with open(self._full_path(), 'w') as f:
 			f.write(yaml.dump(self._meta, default_flow_style=False).encode('utf8'))
 			f.write(u'\n')
 			f.write(self.body.encode('utf8'))
 
-	def _path(self):
-		return self.mapper.path + self.url + '.md'
+	def _full_path(self):
+		return self.root + self.path + '.md'
 
 	@property
 	def meta(self):
@@ -71,30 +71,33 @@ class Mapper(object):
 		self.path = path
 		self.contentclass = contentclass
 
-	def exists(self, url):
-		url = trim_url(url)
-		return os.path.exists(self.path + url + '.md')
+	def exists(self, path):
+		path = trim_path(path)
+		return os.path.exists(self.path + path + '.md')
 
-	def get(self, url):
-		url = trim_url(url)
-		if not self.exists(url):
+	def _get(self, path):
+		return self.contentclass(self.path, path)
+
+	def get(self, path):
+		path = trim_path(path)
+		if not self.exists(path):
 			return None
-		return self.contentclass(self, url)
+		return self._get(path)
 
-	def create(self, url):
-		url = trim_url(url)
-		if self.exists(url):
+	def create(self, path):
+		path = trim_path(path)
+		if self.exists(path):
 			return False
-		path = '/'.join(url.split('/')[:-1])
-		if len(path) > 0 and not os.path.exists(self.path + path):
+		directory = '/'.join(path.split('/')[:-1])
+		if len(directory) > 0 and not os.path.exists(self.path + directory):
 			os.makedirs(self.path + path)
-		return self.contentclass(self, url)
+		return self._get(path)
 
-	def delete(self, url):
-		url = trim_url(url)
-		if not os.path.exists(self.path + url):
+	def delete(self, path):
+		path = trim_path(path)
+		if not os.path.exists(self.path + path):
 			return None
-		os.remove(url)
+		os.remove(path)
 		return True
 
 	def _list(self, subdirectory=None):
@@ -104,11 +107,11 @@ class Mapper(object):
 				if os.path.isdir(fullname):
 					_walk(fullname, path_prefix + (name,))
 				elif name.endswith('.md'):
-					url = u'/'.join(path_prefix + (name[:-3],))
+					path = u'/'.join(path_prefix + (name[:-3],))
 					if subdirectory:
-						url = u'/'.join([subdirectory, url])
-					element = self.contentclass(self, url)
-					elements[element.url] = element
+						path = u'/'.join([subdirectory, path])
+					element = self._get(path)
+					elements[element.path] = element
 		elements = {}
 		if subdirectory:
 			_walk(self.path + subdirectory)
@@ -119,17 +122,17 @@ class Mapper(object):
 	@property
 	def contents(self):
 		"""This property will return a full list of all contents
-		with their url paths. As this has to index the whole
+		with their path paths. As this has to index the whole
 		directory every time it is run, it can be very slow on
 		bigger collections and should be used carefully."""
 		return self._list()
 
-	def subcontents(self, url):
-		url = trim_url(url)
-		"""Get all contents that start with the given url. This
-		will only work is the url is the full part before a
+	def subcontents(self, path):
+		path = trim_path(path)
+		"""Get all contents that start with the given path. This
+		will only work is the path is the full part before a
 		slash, which means all contents will be stored in one
 		directory and its subdirectories."""
-		if not os.path.isdir(self.path + url):
+		if not os.path.isdir(self.path + path):
 			return None
-		return self._list(url)
+		return self._list(path)
