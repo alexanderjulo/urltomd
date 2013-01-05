@@ -40,6 +40,15 @@ class Content(object):
 	def _full_path(self):
 		return self.root + self.path + '.md'
 
+	def _url(self):
+		"""This one can be overwritten by subclasses, if they want
+		to manually pretend to have a different url."""
+		return '/' + self.path + '/'
+
+	@property
+	def url(self):
+		return self._url()
+
 	@property
 	def meta(self):
 		return self._meta
@@ -111,7 +120,7 @@ class Mapper(object):
 					if subdirectory:
 						path = u'/'.join([subdirectory, path])
 					element = self._get(path)
-					elements[element.path] = element
+					elements[element.url] = element
 		elements = {}
 		if subdirectory:
 			_walk(self.path + subdirectory)
