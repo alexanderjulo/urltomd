@@ -37,6 +37,13 @@ class Mapper(object):
 			os.makedirs(self.path + path)
 		return Content(self, url)
 
+	def delete(self, url):
+		url = trim_url(url)
+		if not os.path.exists(self.path + url):
+			return None
+		os.remove(url)
+		return True
+
 class Content(object):
 
 	def __init__(self, mapper, url):
