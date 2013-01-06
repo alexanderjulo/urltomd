@@ -33,7 +33,10 @@ class Content(object):
 		with open(self._full_path()) as f:
 			content = f.read().decode('utf8')
 		content = content.split(u'\n\n')
-		self._meta = yaml.safe_load(content[0])
+		meta = yaml.safe_load(content[0])
+		if not isinstance(meta, dict):
+			meta = {}
+		self._meta = meta
 		self.body = '\n\n'.join(content[1:])
 
 	def _write(self):
