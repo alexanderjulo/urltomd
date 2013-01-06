@@ -80,14 +80,18 @@ class Content(object):
 
 class Mapper(object):
 
-	def __init__(self, path, contentclass=Content):
+	def __init__(self, path=None, contentclass=Content):
+		self.contentclass = contentclass
+		if path:
+			self.init_path(path)
+
+	def init_path(self, path):
 		if not os.path.isdir(path):
 			raise IOError('%s does not exist or is not a directory.'
 				% path)
 		if not path.endswith('/'):
 			path += '/'
 		self.path = path
-		self.contentclass = contentclass
 
 	def exists(self, path):
 		path = trim_path(path)
