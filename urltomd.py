@@ -1,6 +1,6 @@
 import os
 import yaml
-import markdown
+import misaka
 from exceptions import IOError
 
 def trim_path(path):
@@ -19,6 +19,12 @@ class Content(object):
 		self._meta = {}
 		if os.path.exists(self._full_path()):
 			self._read()
+
+	def __repr__(self):
+		if self.meta.get('Title'):
+			return "<Content object '%s' at '%s.md'>" % \
+				(self.meta.get('Title'), self.path)
+		return "<Content object at '%s.md'>" % self.path
 
 	def _read(self):
 		"""Load the current state on the disk. If you use `_read`
@@ -58,7 +64,7 @@ class Content(object):
 
 	@property
 	def html(self):
-		return markdown.markdown(self.body)
+		return misaka.html(self.body)
 
 	def __html__(self):
 		return self.html
