@@ -42,7 +42,7 @@ class Content(object):
 	def _write(self):
 		"""Write the current state to the file."""
 		with open(self._full_path(), 'w') as f:
-			f.write(yaml.dump(self._meta, default_flow_style=False).encode('utf8'))
+			f.write(yaml.safe_dump(self._meta, default_flow_style=False).encode('utf8'))
 			f.write(u'\n')
 			f.write(self.body.encode('utf8'))
 
