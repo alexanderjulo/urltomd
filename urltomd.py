@@ -117,9 +117,9 @@ class Mapper(object):
 
 	def delete(self, path):
 		path = trim_path(path)
-		if not os.path.exists(self.path + path):
-			return None
-		os.remove(path)
+		if not os.path.exists(self.path + path + '.md'):
+			return False
+		os.remove(self.path + path + '.md')
 		return True
 
 	def _list(self, subdirectory=None):
