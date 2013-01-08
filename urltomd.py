@@ -33,7 +33,7 @@ class Content(object):
 		with open(self._full_path()) as f:
 			content = f.read().decode('utf8')
 		content = content.split(u'\n\n')
-		meta = yaml.safe_load(content[0])
+		meta = self._load_meta(content[0])
 		if not isinstance(meta, dict):
 			meta = {}
 		self._meta = meta
@@ -42,7 +42,7 @@ class Content(object):
 	def _write(self):
 		"""Write the current state to the file."""
 		with open(self._full_path(), 'w') as f:
-			f.write(yaml.safe_dump(self._meta, default_flow_style=False).encode('utf8'))
+			f.write(self._dump_meta(self.meta))
 			f.write(u'\n')
 			f.write(self.body.encode('utf8'))
 
@@ -53,6 +53,16 @@ class Content(object):
 		"""This one can be overwritten by subclasses, if they want
 		to manually pretend to have a different url."""
 		return '/' + self.path + '/'
+
+	def _load_meta(self, meta):
+		return yaml.safe_load(meta)
+
+	def _dump_meta(self, meta):
+		return yaml.safe_dump(self._meta,
+			default_flow_style=False).encode('utf8')
+
+	def _render(self, body):
+		return misaka.html(body)
 
 	@property
 	def url(self):
@@ -67,7 +77,7 @@ class Content(object):
 
 	@property
 	def html(self):
-		return misaka.html(self.body)
+		return self._render(self.body)
 
 	def __html__(self):
 		return self.html
