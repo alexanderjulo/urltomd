@@ -3,13 +3,6 @@ import yaml
 import misaka
 from exceptions import IOError
 
-def trim_path(path):
-	if path.startswith('/'):
-		path = path[1:]
-	if path.endswith('/'):
-		path = path[:-1]
-	return path
-
 class Content(object):
 
 	def __init__(self, root, path):
@@ -104,20 +97,20 @@ class Mapper(object):
 		self.path = path
 
 	def exists(self, path):
-		path = trim_path(path)
+		path = path.strip('/')
 		return os.path.exists(self.path + path + '.md')
 
 	def _get(self, path):
 		return self.contentclass(self.path, path)
 
 	def get(self, path):
-		path = trim_path(path)
+		path = path.strip('/')
 		if not self.exists(path):
 			return None
 		return self._get(path)
 
 	def create(self, path):
-		path = trim_path(path)
+		path = path.strip('/')
 		if self.exists(path):
 			return False
 		directory = '/'.join(path.split('/')[:-1])
@@ -126,7 +119,7 @@ class Mapper(object):
 		return self._get(path)
 
 	def delete(self, path):
-		path = trim_path(path)
+		path = path.strip('/')
 		if not os.path.exists(self.path + path + '.md'):
 			return False
 		os.remove(self.path + path + '.md')
@@ -160,7 +153,7 @@ class Mapper(object):
 		return self._list()
 
 	def subcontents(self, path):
-		path = trim_path(path)
+		path = path.strip('/')
 		"""Get all contents that start with the given path. This
 		will only work is the path is the full part before a
 		slash, which means all contents will be stored in one
