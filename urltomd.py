@@ -19,11 +19,11 @@ class Content(object):
 				(self.meta.get('Title'), self.path)
 		return "<Content object at '%s.md'>" % self.path
 
-	def _read(self):
-		"""Load the current state on the disk. If you use `_read`
-		before you saved eventual changes with `_write` they will
+	def read(self):
+		"""Load the current state on the disk. If you use `read`
+		before you saved eventual changes with `write` they will
 		be lost."""
-		with open(self._full_path()) as f:
+		with open(self.full_path()) as f:
 			content = f.read().decode('utf8')
 		content = content.split(u'\n\n')
 		meta = self.load_meta(content[0])
@@ -113,7 +113,7 @@ class Mapper(object):
 		directory = '/'.join(path.split('/')[:-1])
 		if len(directory) > 0 and not os.path.exists(self.path + directory):
 			os.makedirs(self.path + path)
-		return self._get(path)
+		return self.get(path)
 
 	def delete(self, path):
 		path = path.strip('/')
@@ -132,7 +132,7 @@ class Mapper(object):
 					path = u'/'.join(path_prefix + (name[:-3],))
 					if subdirectory:
 						path = u'/'.join([subdirectory, path])
-					element = self._get(path)
+					element = self.get(path)
 					elements[element.url] = element
 		elements = {}
 		if subdirectory:
