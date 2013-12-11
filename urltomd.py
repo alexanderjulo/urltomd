@@ -42,11 +42,6 @@ class Content(object):
 	def full_path(self):
 		return self.root + self.path + '.md'
 
-	def _url(self):
-		"""This one can be overwritten by subclasses, if they want
-		to manually pretend to have a different url."""
-		return '/' + self.path + '/'
-
 	def load_meta(self, meta):
 		return yaml.safe_load(meta)
 
@@ -59,7 +54,9 @@ class Content(object):
 
 	@property
 	def url(self):
-		return self.url()
+		"""This one can be overwritten by subclasses, if they want
+		to manually pretend to have a different url."""
+		return '/' + self.path + '/'
 
 	@property
 	def meta(self):
