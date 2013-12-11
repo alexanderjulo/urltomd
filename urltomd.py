@@ -10,8 +10,8 @@ class Content(object):
 		self.path = path
 		self.body = None
 		self._meta = {}
-		if os.path.exists(self._full_path()):
-			self._read()
+		if os.path.exists(self.full_path()):
+			self.read()
 
 	def __repr__(self):
 		if self.meta.get('Title'):
@@ -26,20 +26,20 @@ class Content(object):
 		with open(self._full_path()) as f:
 			content = f.read().decode('utf8')
 		content = content.split(u'\n\n')
-		meta = self._load_meta(content[0])
+		meta = self.load_meta(content[0])
 		if not isinstance(meta, dict):
 			meta = {}
 		self._meta = meta
 		self.body = '\n\n'.join(content[1:])
 
-	def _write(self):
+	def write(self):
 		"""Write the current state to the file."""
-		with open(self._full_path(), 'w') as f:
-			f.write(self._dump_meta(self.meta))
+		with open(self.full_path(), 'w') as f:
+			f.write(self.dump_meta(self.meta))
 			f.write(u'\n')
 			f.write(self.body.encode('utf8'))
 
-	def _full_path(self):
+	def full_path(self):
 		return self.root + self.path + '.md'
 
 	def _url(self):
@@ -47,19 +47,19 @@ class Content(object):
 		to manually pretend to have a different url."""
 		return '/' + self.path + '/'
 
-	def _load_meta(self, meta):
+	def load_meta(self, meta):
 		return yaml.safe_load(meta)
 
-	def _dump_meta(self, meta):
+	def dump_meta(self, meta):
 		return yaml.safe_dump(self._meta,
 			default_flow_style=False).encode('utf8')
 
-	def _render(self, body):
+	def render(self, body):
 		return misaka.html(body)
 
 	@property
 	def url(self):
-		return self._url()
+		return self.url()
 
 	@property
 	def meta(self):
@@ -70,16 +70,16 @@ class Content(object):
 
 	@property
 	def html(self):
-		return self._render(self.body)
+		return self.render(self.body)
 
 	def __html__(self):
 		return self.html
 
 	def save(self):
-		self._write()
+		self.write()
 
 	def reload(self):
-		self._read()
+		self.read()
 
 class Mapper(object):
 
@@ -100,14 +100,11 @@ class Mapper(object):
 		path = path.strip('/')
 		return os.path.exists(self.path + path + '.md')
 
-	def _get(self, path):
-		return self.contentclass(self.path, path)
-
 	def get(self, path):
 		path = path.strip('/')
 		if not self.exists(path):
 			return None
-		return self._get(path)
+		return self.contentclass(self.path, path)
 
 	def create(self, path):
 		path = path.strip('/')
