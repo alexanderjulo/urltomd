@@ -113,7 +113,7 @@ class Mapper(object):
 		directory = '/'.join(path.split('/')[:-1])
 		if len(directory) > 0 and not os.path.exists(self.path + directory):
 			os.makedirs(self.path + path)
-		return self._get(path)
+		return self.get(path)
 
 	def delete(self, path):
 		path = path.strip('/')
@@ -132,7 +132,7 @@ class Mapper(object):
 					path = u'/'.join(path_prefix + (name[:-3],))
 					if subdirectory:
 						path = u'/'.join([subdirectory, path])
-					element = self._get(path)
+					element = self.get(path)
 					elements[element.url] = element
 		elements = {}
 		if subdirectory:
