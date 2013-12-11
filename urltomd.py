@@ -23,7 +23,7 @@ class Content(object):
 		"""Load the current state on the disk. If you use `read`
 		before you saved eventual changes with `write` they will
 		be lost."""
-		with open(self._full_path()) as f:
+		with open(self.full_path()) as f:
 			content = f.read().decode('utf8')
 		content = content.split(u'\n\n')
 		meta = self.load_meta(content[0])
