@@ -19,9 +19,9 @@ class Content(object):
 				(self.meta.get('Title'), self.path)
 		return "<Content object at '%s.md'>" % self.path
 
-	def _read(self):
-		"""Load the current state on the disk. If you use `_read`
-		before you saved eventual changes with `_write` they will
+	def read(self):
+		"""Load the current state on the disk. If you use `read`
+		before you saved eventual changes with `write` they will
 		be lost."""
 		with open(self._full_path()) as f:
 			content = f.read().decode('utf8')
