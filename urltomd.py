@@ -201,7 +201,7 @@ class Mapper(object):
 
 					if _return == 'list':
 						elements.append(element)
-					elif _return == 'dict'
+					elif _return == 'dict':
 						elements[element.url] = element
 
 		if _return == 'list':
