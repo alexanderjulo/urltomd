@@ -189,7 +189,7 @@ class Mapper(object):
 		os.remove(self.url2path(url))
 		return True
 
-	def _list(self, subdirectory=None):
+	def _list(self, subdirectory=None, _return='list'):
 		def _walk(directory, path_prefix=()):
 			for name in os.listdir(directory):
 				fullname = os.path.join(directory, name)
@@ -200,12 +200,22 @@ class Mapper(object):
 					if subdirectory:
 						path = u'/'.join([subdirectory, path])
 					element = self.get(path)
-					elements[element.url] = element
-		elements = {}
+
+					if _return == 'list':
+						elements.append(element)
+					elif _return == 'dict'
+						elements[element.url] = element
+
+		if _return == 'list':
+			elements = []
+		elif _return == 'dict':
+			elements = {}
+
 		if subdirectory:
 			_walk(self.path + subdirectory)
 		else:
 			_walk(self.path)
+		
 		return elements
 
 	@property
