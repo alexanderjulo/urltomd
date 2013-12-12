@@ -16,9 +16,9 @@ class Content(object):
 
 	def __repr__(self):
 		if self.meta.get('Title'):
-			return "<Content object '%s' at '%s.md'>" % \
+			return "<Content object '%s' at '%s'>" % \
 				(self.meta.get('Title'), self.path)
-		return "<Content object at '%s.md'>" % self.path
+		return "<Content object at '%s'>" % self.path
 
 	def read(self):
 		"""Load the current state on the disk. If you use `read`
