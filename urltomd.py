@@ -79,6 +79,23 @@ class Content(object):
 		self.read()
 
 class Mapper(object):
+	"""
+		The main interaction object with the api. Will map urls onto
+		markdown files. Takes to optional arguments when initiated:
+
+			:param path: The place where the files are on which the urls
+			should be mapped
+			:param contentclass: In case you want to overwrite the class
+			that is used for content objects you can pass it on here and
+			the `Mapper` class will use it.
+
+		As this library was designed to be used with flask and with app
+		factories you can pass the `path` later using `init_path`. If
+		you pass the `path` on init it will automatically be called.
+
+		Please note that the path has to exist and be a directory, it
+		does not have to have any content though.
+	"""
 
 	def __init__(self, path=None, contentclass=Content):
 		self.contentclass = contentclass
@@ -86,6 +103,13 @@ class Mapper(object):
 			self.init_path(path)
 
 	def init_path(self, path):
+		"""
+			Checks whether the given path exists and is a directory.
+			Cleans the path and saves it to the instance.
+
+				:param path: The path in which urltomd should search for
+				files.
+		"""
 		if not os.path.isdir(path):
 			raise IOError('%s does not exist or is not a directory.'
 				% path)
@@ -93,30 +117,76 @@ class Mapper(object):
 			path += '/'
 		self.path = path
 
-	def exists(self, path):
-		path = path.strip('/')
-		return os.path.exists(self.path + path + '.md')
+	def url2path(self, url, relative=False):
+		"""
+			Converts the given url to the path of the corresponding
+			local markdown file.
 
-	def get(self, path):
-		path = path.strip('/')
-		if not self.exists(path):
+				:param url: the url to convert.
+				:param relative: Is `False` per default, if it is `True`
+				the function will return the path without the mapper
+				root.
+		"""
+		if relative:
+			return url.strip('/') + '.md'
+		return self.path + url.strip('/') + '.md'
+
+	def exists(self, url):
+		"""
+			Checks whether a markdown file exists in the given path that
+			matches the given url.
+
+			:param url: The path to check
+		"""
+		path = self.url2path(url)
+		return os.path.exists(path)
+
+	def get(self, url):
+		"""
+			Returns a content object to an url. It will be either an
+			instance of `Content` or of the given `contentclass`.
+
+				:param url: The url of the file to return.
+		"""
+		if not self.exists(url):
 			return None
+		path = self.url2path(url, relative=True)
 		return self.contentclass(self.path, path)
 
-	def create(self, path):
-		path = path.strip('/')
-		if self.exists(path):
+	def create(self, url):
+		"""
+			Creates a new content object corresponding to the given url.
+
+				:param url: The url of the object.
+
+			It will make sure that all necessary directories are created
+			and the actual object can be successfully saved on the file
+			system. It will NOT create the object itself, because there
+			is no data yet. If the object exists already it will return
+			`False`, otherwise it will return a content object (like
+			`get`) that has to be saved to be created on the filesystem. 
+		"""
+		path = self.url2path(url, relative=True)
+		if self.exists(url):
 			return False
 		directory = '/'.join(path.split('/')[:-1])
 		if len(directory) > 0 and not os.path.exists(self.path + directory):
 			os.makedirs(self.path + path)
 		return self.get(path)
 
-	def delete(self, path):
-		path = path.strip('/')
-		if not os.path.exists(self.path + path + '.md'):
+	def delete(self, url):
+		"""
+			Will try to remove the corresponding content object to the
+			given url from the file system.
+
+				:param url: The url of the object to remove.
+
+			Returns `True` if the object existed and was removed and
+			`False` if it does not exist.
+		"""
+		if not self.exists(url):
 			return False
-		os.remove(self.path + path + '.md')
+		os.remove(self.url2path(url))
 		return True
 
 	def _list(self, subdirectory=None):
