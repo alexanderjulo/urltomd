@@ -43,6 +43,8 @@ class BaseTestCase(TestCase):
                 :param chars: The collection of chars to pick from. Per
                     default all uppercase letters from ascii and all
                     digits.
+
+            Copied from http://stackoverflow.com/a/2257449/1743565
         """
         return ''.join(random.choice(chars) for x in range(size))
 
