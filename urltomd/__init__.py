@@ -48,8 +48,10 @@ class Content(object):
         return yaml.safe_load(meta)
 
     def dump_meta(self, meta):
-        return yaml.safe_dump(self._meta,
-            default_flow_style=False).encode('utf8')
+        return yaml.safe_dump(
+            self._meta,
+            default_flow_style=False
+        ).encode('utf8')
 
     def render(self, body):
         return misaka.html(body)
@@ -76,6 +78,7 @@ class Content(object):
 
 
 class Mapper(object):
+
     """
         The main interaction object with the api. Will map urls onto
         markdown files. Takes to optional arguments when initiated:
@@ -109,7 +112,7 @@ class Mapper(object):
         """
         if not os.path.isdir(path):
             raise IOError('%s does not exist or is not a directory.'
-                % path)
+                          % path)
         if not path.endswith('/'):
             path += '/'
         self.path = path
@@ -215,7 +218,7 @@ class Mapper(object):
             _walk(self.path + subdirectory)
         else:
             _walk(self.path)
-        
+
         return elements
 
     @property
