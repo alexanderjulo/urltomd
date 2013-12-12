@@ -1,3 +1,9 @@
 # ignore virtualenv
 .venv
+
+# ignore sublime files
 *.sublime-*
+
+# ignore setuptools data
+dist
+urltomd.egg-info
