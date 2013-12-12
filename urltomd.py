@@ -5,8 +5,9 @@ from exceptions import IOError
 
 class Content(object):
 
-	def __init__(self, root, path):
+	def __init__(self, root, url, path):
 		self.root = root
+		self.url = url
 		self.path = path
 		self.body = None
 		self._meta = {}
@@ -40,7 +41,7 @@ class Content(object):
 			f.write(self.body.encode('utf8'))
 
 	def full_path(self):
-		return self.root + self.path + '.md'
+		return os.path.join(self.root, self.path)
 
 	def load_meta(self, meta):
 		return yaml.safe_load(meta)
@@ -51,12 +52,6 @@ class Content(object):
 
 	def render(self, body):
 		return misaka.html(body)
-
-	@property
-	def url(self):
-		"""This one can be overwritten by subclasses, if they want
-		to manually pretend to have a different url."""
-		return '/' + self.path + '/'
 
 	@property
 	def meta(self):
@@ -150,8 +145,11 @@ class Mapper(object):
 		"""
 		if not self.exists(url):
 			return None
-		path = self.url2path(url, relative=True)
-		return self.contentclass(self.path, path)
+		return self.contentclass(
+			self.path,
+			url,
+			self.url2path(url, relative=True)
+		)
 
 	def create(self, url):
 		"""
