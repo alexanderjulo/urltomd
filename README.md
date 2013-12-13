@@ -27,6 +27,17 @@ mapper.contents
 ```
 
 ## How can I get it?
-Just download the `urltomd.py` file and import it to your project.
+Just install it via pip!
 
-The requirements can be checked in the `requirements.txt` file, which are basically yaml and markdown.
+    pip install urltomd
+
+You can then import the relevant classes (only `Mapper` is necessary) from `urltomd`:
+
+```python
+import urltomd
+
+mapper = urltomd.Mapper('.')
+```
+
+## This is too low level for me.
+I can totally understand that. I am currently working on [flare](https://github.com/alexex/flare), which is basically a a highly customizable static file content management system built upon urltomd. Why don't you have a look at it?
