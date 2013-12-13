@@ -86,6 +86,63 @@ class MapperTestCase(BaseTestCase):
         f.close()
         assert self.mapper.exists(url) == True
 
+    def test_get(self):
+        """
+            Make sure that proper contentobjects are returned (of the
+            custom class, if defined).
+        """
+        url = self.gen_rand_str()
+        content = self.mapper.get(url)
+        assert content == None
+
+        f = open(self.mapper.url2path(url), 'w')
+        f.close()
+        content = self.mapper.get(url)
+        assert content != None
+        assert isinstance(content, Content)
+
+        class CustomContent(Content):
+            pass
+
+        custommapper = Mapper(self.path, contentclass=CustomContent)
+        content = custommapper.get(url)
+        assert content != None
+        assert isinstance(content, CustomContent)
+
+    def test_create(self):
+        """
+            Create only non existing files but necessary directories.
+        """
+        url = self.gen_rand_str()
+        f = open(self.mapper.url2path(url), 'w')
+        f.close()
+
+        content = self.mapper.create(url)
+        assert content == False
+
+        dirurl = self.gen_rand_str()
+        deepurl = os.path.join(dirurl, url)
+        content = self.mapper.create(deepurl)
+        assert os.path.exists(os.path.join(self.path, dirurl))
+
+        superdirurl = self.gen_rand_str()
+        deepdeepurl = os.path.join(superdirurl, dirurl, url)
+        content = self.mapper.create(deepdeepurl)
+        assert os.path.exists(os.path.join(self.path, superdirurl, dirurl))
+
+    def test_delete(self):
+        """
+            Make sure deletion works.
+        """
+        url = self.gen_rand_str()
+        result = self.mapper.delete(url)
+        assert result == False
+        f = open(self.mapper.url2path(url), 'w')
+        f.close()
+        result = self.mapper.delete(url)
+        assert result == True
+        assert os.path.exists(self.mapper.url2path(url)) == False
+
 
 class ContentTestCase(BaseTestCase):
 
