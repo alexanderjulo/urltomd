@@ -8,7 +8,7 @@ class Content(object):
 
     def __init__(self, root, url, path):
         self.root = root
-        self.url = url
+        self._url = url
         self.path = path
         self.body = None
         self._meta = {}
@@ -55,6 +55,14 @@ class Content(object):
 
     def render(self, body):
         return misaka.html(body)
+
+    @property
+    def url(self):
+        """
+            Make all urls nice and shiny, slashes in the end and
+            beginning. This way links work much better.
+        """
+        return '/' + self._url + '/'
 
     @property
     def meta(self):
