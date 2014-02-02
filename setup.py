@@ -15,7 +15,7 @@ from setuptools import setup
 
 setup(
     name='urltomd',
-    version='0.2',
+    version='0.3',
     url='https://github.com/alexex/urltomd',
     license='MIT',
     author='Alexander Jung-Loddenkemper',

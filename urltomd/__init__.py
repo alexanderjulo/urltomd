@@ -175,15 +175,16 @@ class Mapper(object):
             system. It will NOT create the object itself, because there
             is no data yet. If the object exists already it will return
             `False`, otherwise it will return a content object (like
-            `get`) that has to be saved to be created on the filesystem. 
+            `get`) that has to be saved to be created on the filesystem.
         """
-        path = self.url2path(url, relative=True)
         if self.exists(url):
             return False
+        path = self.url2path(url)
         directory = '/'.join(path.split('/')[:-1])
-        if len(directory) > 0 and not os.path.exists(self.path + directory):
-            os.makedirs(self.path + path)
-        return self.get(path)
+        if len(directory) > 0 and not os.path.exists(directory):
+            os.makedirs(directory)
+        open(path, 'w').close()
+        return self.get(url)
 
     def delete(self, url):
         """
