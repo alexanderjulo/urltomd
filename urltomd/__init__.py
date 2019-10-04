@@ -1,7 +1,10 @@
 import os
 import yaml
 import misaka
-from exceptions import IOError
+try:
+    from exceptions import IOError
+except ModuleNotFoundError:
+    pass
 
 
 class Content(object):
